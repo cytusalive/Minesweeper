@@ -11,7 +11,7 @@ screen.fill(bgcolor)
 clock = pygame.time.Clock()
 
 fieldsize = 20
-minefield = [[[] for a in range(fieldsize+2)] for b in range(fieldsize+2)]
+minefield = [[None for a in range(fieldsize+2)] for b in range(fieldsize+2)]
 sqsize = screen.get_width() // (fieldsize+2)
 revealed = [[False for a in range(fieldsize+2)] for b in range(fieldsize+2)]
 
@@ -49,7 +49,7 @@ def plantmine(x, y):
                      minefield[a+1][b+1] = "#"                 
     return
 
-for c in range(80):
+for c in range(70):
 	plantmine(r.randint(0, fieldsize), r.randint(0, fieldsize))
 
 for a in range(len(minefield[1:-1])):
@@ -62,39 +62,26 @@ for a in minefield:
 	print(a)
 
 textcolor = (200, 0, 0)
-font = pygame.font.Font("freesansbold.ttf", 20)
+font = pygame.font.Font("freesansbold.ttf", 24)
 
 def revealarea(x, y):
     leftx = x - 1 
     rightx = x + 1
     upy = y - 1
     downy = y + 1
-    if revealed[y][x]:
-        return
-    else:           
-        if minefield[y][x] == "#":
-            revealed[y][x] = True
-        elif minefield[y][x] != "0":
-            revealed[y][x] = True
-        elif minefield[y][x] == "0":
-            revealed[y][x] = True
-            if minefield[upy][leftx] == "0":
-                revealarea(leftx, upy)
-            if minefield[upy][x] == "0":
-                revealarea(x, upy)
-            if minefield[upy][rightx] == "0":
-                revealarea(rightx, upy)
-            if minefield[y][leftx] == "0":
-                revealarea(leftx, y)
-            if minefield[y][rightx] == "0":
-                revealarea(rightx, y)
-            if minefield[downy][leftx] == "0":
-                revealarea(leftx, downy)
-            if minefield[downy][x] == "0":
-                revealarea(x, downy)
-            if minefield[downy][rightx] == "0":
-                revealarea(rightx, downy)
-
+    xs = [leftx, x, rightx]
+    ys = [upy, y, downy]
+    revealed[y][x] = True
+    if minefield[y][x] == "0":
+        for xi in xs:
+            for yi in ys:
+                if revealed[yi][xi]:
+                    continue
+                if minefield[yi][xi] == "#":
+                    continue
+                if minefield[yi][xi] == None:
+                    continue
+                revealarea(xi, yi)
 
 while True:
     screen.fill(bgcolor)
@@ -107,7 +94,7 @@ while True:
             revealarea(mousex//sqsize, mousey//sqsize)
     for y in range(len(minefield)):
         for x in range(len(minefield[y])):
-            if minefield[y][x] == []:
+            if minefield[y][x] == None:
                 pygame.draw.rect(screen, (bgcolor), (x*sqsize, y*sqsize, sqsize, sqsize))
             elif minefield[y][x] == "#":
                 if revealed[y][x]:
